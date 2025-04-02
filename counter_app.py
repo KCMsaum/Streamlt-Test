@@ -1,44 +1,51 @@
 import streamlit as st
 import time
+import requests
 
-# Initialize session state variables
+# Initialize session state
 if 'count' not in st.session_state:
     st.session_state.count = 0
 if 'running' not in st.session_state:
     st.session_state.running = False
+if 'fact' not in st.session_state:
+    st.session_state.fact = "Click button to get a random fact!"
 
-# Function to increment the counter
 def increment_counter():
     while st.session_state.running:
         st.session_state.count += 1
-        time.sleep(1)  # Wait 1 second between increments
-        st.rerun()  # Rerun the app to update the display
+        time.sleep(1)
+        st.rerun()
 
-# App layout
-st.title("Simple Counter App")
+def get_random_fact():
+    try:
+        response = requests.get("https://uselessfacts.jsph.pl/random.json?language=en")
+        st.session_state.fact = response.json()['text']
+    except:
+        st.session_state.fact = "Failed to fetch fact 😞"
 
-# Display the current count
+st.title("Enhanced Counter App 🚀")
+
+# Display section
 st.header(f"Count: {st.session_state.count}")
+st.subheader("Random Fact:")
+st.write(st.session_state.fact)
 
-# Create columns for buttons
-col1, col2, col3 = st.columns(3)
-
+# Control buttons
+col1, col2, col3, col4 = st.columns(4)
 with col1:
-    if st.button("Start", disabled=st.session_state.running):
+    if st.button("Start ▶️", disabled=st.session_state.running):
         st.session_state.running = True
-        st.rerun()  # Rerun to start the counter
-
 with col2:
-    if st.button("Stop", disabled=not st.session_state.running):
+    if st.button("Stop ⏹️", disabled=not st.session_state.running):
         st.session_state.running = False
-        st.rerun()  # Rerun to stop the counter
-
 with col3:
-    if st.button("Reset"):
+    if st.button("Reset 🔄"):
         st.session_state.count = 0
         st.session_state.running = False
-        st.rerun()  # Rerun to update the display
+with col4:
+    if st.button("New Fact 🎲"):
+        get_random_fact()
 
-# Start the counter if running
+# Run counter if active
 if st.session_state.running:
     increment_counter()
